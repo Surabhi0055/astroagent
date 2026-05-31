@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+langgraph
+langchain
+langchain-community
+langchain-ollama
+flatlib
+geopy
+python-dotenv
+httpx
+EOF
