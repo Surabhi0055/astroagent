@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+langgraph
+langchain
+langchain-community
+langchain-groq
+pyswisseph
+geopy
+python-dotenv
+timezonefinder

@@ -6,7 +6,8 @@ from langgraph.prebuilt import ToolNode
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_core.tools import tool
-from typing import TypedDict, List, Annotated
+from pydantic import BaseModel, Field
+from typing import TypedDict, List, Annotated, Literal
 import operator
 
 load_dotenv()
@@ -35,7 +36,13 @@ def get_daily_transits(date: str, natal_chart: str) -> str:
     result = _transits(date, natal)
     return json.dumps(result)
 
-tools = [geocode_place, compute_birth_chart, get_daily_transits]
+@tool
+def knowledge_lookup(query: str) -> str:
+    """Search the Aradhana spiritual database for astrology interpretations. Use this to explain planet placements."""
+    from tools.knowledge import lookup_astrology_meaning as _lookup
+    return _lookup(query)
+
+tools = [geocode_place, compute_birth_chart, get_daily_transits, knowledge_lookup]
 
 # ── LLM ────────────────────────────────────────────────────────────────────
 
@@ -48,36 +55,71 @@ llm = ChatGroq(
 
 class AgentState(TypedDict):
     messages: Annotated[List, operator.add]
+    intent: str
 
 # ── System Prompt ──────────────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are AstroAgent, a warm and caring AI astrologer for Aradhana — a daily spiritual companion app.
-
-Your role is to:
-- Compute accurate birth charts using real planetary data
-- Interpret planetary positions with warmth and spiritual insight
-- Answer questions about daily transits and their meaning
-- Guide users through their astrological journey with care
+SYSTEM_PROMPT = """You are AstroAgent, a warm, empathetic, and spiritual guide for Aradhana.
+You act as a thoughtful mirror, helping users reflect on their journey using astrology.
 
 Important rules:
-- Always use tools to get real planetary data — never invent positions
-- Never present readings as medical, legal, or financial certainty
-- If birth details are missing, kindly ask for them
-- Respond with warmth, empathy, and spiritual wisdom
-- Keep responses conversational and grounded
+- Always be conversational, compassionate, and calm.
+- Never give generic horoscope traits; instead, use the knowledge_lookup tool to find profound spiritual meanings for planet placements.
+- ALWAYS use tools to get real planetary data — NEVER invent positions.
+- NEVER present readings as medical, legal, or financial advice. If a user asks for certainty in these areas, gently guide them back to spiritual reflection.
+- If birth details are missing, kindly ask for them.
 
 When a user shares birth details, always:
-1. First geocode their birth place
-2. Then compute their birth chart
-3. Then interpret the results warmly
+1. Geocode their birth place.
+2. Compute their birth chart.
+3. Look up the meanings using knowledge_lookup.
+4. Interpret the results warmly.
 """
+
+# ── Router (Intent Classification) ─────────────────────────────────────────
+
+class Intent(BaseModel):
+    intent: Literal["chart_request", "daily_horoscope", "free_form_question", "off_topic"] = Field(
+        description="Classify the user intent into one of the available categories."
+    )
+
+# Using temperature 0 for more deterministic routing
+router_llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0,
+    api_key=os.getenv("GROQ_API_KEY")
+).with_structured_output(Intent)
+
+def router_node(state: AgentState):
+    messages = state["messages"]
+    last_message = messages[-1] if messages else None
+    
+    if last_message and isinstance(last_message, HumanMessage):
+        try:
+            classification = router_llm.invoke(
+                f"Classify this user message: {last_message.content}"
+            )
+            return {"intent": classification.intent}
+        except Exception:
+            return {"intent": "free_form_question"}
+            
+    return {"intent": "free_form_question"}
 
 # ── Nodes ──────────────────────────────────────────────────────────────────
 
 def reasoning_node(state: AgentState):
     messages = state["messages"]
+    
+    intent = state.get("intent", "free_form_question")
+    
+    # Prepend system prompt if not present
     if not any(isinstance(m, SystemMessage) for m in messages):
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
+        
+    # If the intent is off_topic, add a temporary system message to guide behavior
+    if intent == "off_topic":
+        messages = messages + [SystemMessage(content="The user has asked an off-topic question. Politely refuse to answer and guide them back to astrology or spiritual reflection.")]
+        
     response = llm.invoke(messages)
     return {"messages": [response]}
 
@@ -92,22 +134,12 @@ def should_continue(state: AgentState):
 tool_node = ToolNode(tools)
 
 graph = StateGraph(AgentState)
+graph.add_node("router", router_node)
 graph.add_node("reasoning", reasoning_node)
 graph.add_node("tools", tool_node)
-graph.set_entry_point("reasoning")
+
+graph.set_entry_point("router")
+graph.add_edge("router", "reasoning")
 graph.add_conditional_edges("reasoning", should_continue)
 graph.add_edge("tools", "reasoning")
 app = graph.compile()
-
-# ── Test ───────────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    print("🔮 AstroAgent is live!\n")
-    result = app.invoke({
-        "messages": [
-            HumanMessage(content="Hi! My name is Priya. I was born on June 15, 1995 at 10:30 AM in Mumbai. What does my birth chart say?")
-        ]
-    })
-    for message in result["messages"]:
-        if isinstance(message, AIMessage) and message.content:
-            print("AstroAgent:", message.content)

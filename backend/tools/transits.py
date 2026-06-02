@@ -1,27 +1,24 @@
-import ephem
+import swisseph as swe
 from datetime import datetime
 import pytz
-from birth_chart import compute_birth_chart, get_zodiac_sign, PLANETS, ZODIAC_SIGNS
+from tools.birth_chart import compute_birth_chart, get_zodiac_sign, PLANETS, ZODIAC_SIGNS
 
 def get_daily_transits(date: str, natal_chart: dict) -> dict:
     """
-    Get current planetary transits for a given date
+    Get current planetary transits for a given date (UTC noon)
     and compare them to the user's natal chart.
     date: 'YYYY-MM-DD'
     natal_chart: output from compute_birth_chart()
     """
     try:
         # Use UTC noon for daily transits
-        observer = ephem.Observer()
-        observer.lat = '0'
-        observer.lon = '0'
-        observer.date = f"{date.replace('-', '/')} 12:00:00"
+        dt = datetime.strptime(f"{date} 12:00", "%Y-%m-%d %H:%M")
+        julian_day = swe.julday(dt.year, dt.month, dt.day, 12.0)
 
         transits = {}
-        for name, planet in PLANETS.items():
-            planet.compute(observer)
-            degrees = float(planet.hlong) * 180 / 3.14159265
-            degrees = degrees % 360
+        for name, planet_id in PLANETS.items():
+            position, _ = swe.calc_ut(julian_day, planet_id)
+            degrees = position[0]
             sign = get_zodiac_sign(degrees)
 
             # Compare to natal position if available
@@ -61,10 +58,8 @@ def get_daily_transits(date: str, natal_chart: dict) -> dict:
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-
 if __name__ == "__main__":
     import json
-
     # First get natal chart
     natal = compute_birth_chart(
         date="1995-06-15",
@@ -73,7 +68,6 @@ if __name__ == "__main__":
         longitude=72.8692035,
         timezone="Asia/Kolkata"
     )
-
     # Then get today's transits
     result = get_daily_transits("2026-06-01", natal)
     print(json.dumps(result, indent=2))
