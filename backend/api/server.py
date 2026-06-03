@@ -6,7 +6,7 @@ import json
 import logging
 
 from main import app as agent_app
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 app = FastAPI(title="AstroAgent API")
 
@@ -18,12 +18,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from typing import Optional, Dict, Any
+from tools.svg_chart import generate_birth_chart_image
+
 class ChatRequest(BaseModel):
     message: str
+    mode: str = "western"  # "western" or "vedic"
+    user_context: Optional[Dict[str, Any]] = None
 
-async def generate_chat_stream(user_message: str):
+class ChartImageRequest(BaseModel):
+    planets: Dict[str, Any]
+    houses: Dict[str, Any]
+    ascendant: float
+    midheaven: float
+    name: str
+    birth_info: str
+
+async def generate_chat_stream(user_message: str, mode: str, user_context: Optional[Dict[str, Any]] = None):
+    # Inject user context directly into the first message or let the agent state handle it
+    # For LangGraph, passing it via a system message at the start is effective
+    messages = []
+    if user_context:
+        ctx_str = f"System Context: The user's name is {user_context.get('name', 'Seeker')}. Birth details: {user_context.get('date', '')} {user_context.get('time', '')} in {user_context.get('place', '')}."
+        messages.append(SystemMessage(content=ctx_str))
+        
+    messages.append(HumanMessage(content=user_message))
+    
     inputs = {
-        "messages": [HumanMessage(content=user_message)]
+        "messages": messages,
+        "mode": mode
     }
     
     try:
@@ -42,7 +65,10 @@ async def generate_chat_stream(user_message: str):
                 
             elif kind == "on_tool_end":
                 tool_name = event["name"]
-                yield f"data: {json.dumps({'type': 'tool_end', 'tool': tool_name})}\n\n"
+                tool_output = event["data"].get("output", "")
+                if hasattr(tool_output, "content"):
+                    tool_output = tool_output.content
+                yield f"data: {json.dumps({'type': 'tool_end', 'tool': tool_name, 'output': str(tool_output)})}\n\n"
 
         yield "data: [DONE]\n\n"
     except Exception as e:
@@ -52,9 +78,24 @@ async def generate_chat_stream(user_message: str):
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(
-        generate_chat_stream(request.message), 
+        generate_chat_stream(request.message, request.mode, request.user_context), 
         media_type="text/event-stream"
     )
+
+@app.post("/api/chart/image")
+async def generate_chart_image(request: ChartImageRequest):
+    try:
+        result = generate_birth_chart_image(
+            request.planets,
+            request.houses,
+            request.ascendant,
+            request.midheaven,
+            request.name,
+            request.birth_info
+        )
+        return result
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 if __name__ == "__main__":
     import uvicorn
