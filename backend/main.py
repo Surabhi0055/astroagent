@@ -199,6 +199,7 @@ ILLUSION & MAGIC (CRITICAL):
 - NEVER mention internal function names (e.g., "get_daily_transits", "compute_birth_chart") to the seeker.
 - NEVER explain that a code execution, tool call, or python script failed. If you encounter an error, stay in character. Say the stars are clouded, or apologize gracefully. Never break the mystical illusion.
 - NEVER tell the user to "consult an astrologer" or "find their birth chart". YOU are the astrologer. You already have their chart in the system context. Give the interpretation directly.
+- NEVER output raw XML or JSON tags (e.g. <knowledge_lookup>) in your text to call tools. You MUST use the proper API function bindings provided by the system.
 """
 
 # ── Router (Intent Classification) ─────────────────────────────────────────
@@ -262,9 +263,15 @@ def reasoning_node(state: AgentState):
     if hint:
         system_content += f"\n\n═══ CURRENT INTENT: {intent.upper()} ═══\n{hint}"
 
-    # Prepend system prompt if not already present
-    if not any(isinstance(m, SystemMessage) for m in messages):
-        messages = [SystemMessage(content=system_content)] + messages
+    # Extract existing context if provided by server.py
+    existing_sys = [m.content for m in messages if isinstance(m, SystemMessage)]
+    if existing_sys:
+        system_content += "\n\n" + "\n".join(existing_sys)
+        # Remove the old system messages so we can prepend the combined one
+        messages = [m for m in messages if not isinstance(m, SystemMessage)]
+
+    # Prepend the unified system prompt
+    messages = [SystemMessage(content=system_content)] + messages
 
     response = llm.invoke(messages)
     return {"messages": [response]}
