@@ -56,6 +56,9 @@ def calculate_aspects(planets_data):
                     })
     return aspects
 
+from functools import lru_cache
+
+@lru_cache(maxsize=32)
 def compute_birth_chart(
     date: str,
     time: str,

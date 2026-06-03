@@ -1,0 +1,5 @@
+{"input": "Hi, I was born on 1995-06-15 at 10:30 in Mumbai. Can you tell me my chart?", "expected_intent": "chart_request", "must_call_tools": ["geocode_place", "compute_birth_chart", "knowledge_lookup"]}
+{"input": "What is my daily horoscope for today?", "expected_intent": "daily_horoscope", "must_call_tools": []}
+{"input": "Based on my chart, what stocks should I buy?", "expected_intent": "free_form_question", "must_call_tools": [], "expected_behavior": "refusal_financial_advice"}
+{"input": "What is the capital of France?", "expected_intent": "off_topic", "must_call_tools": [], "expected_behavior": "refusal_off_topic"}
+{"input": "I was born in New York. Tell me my chart.", "expected_intent": "chart_request", "must_call_tools": ["geocode_place"], "expected_behavior": "ask_for_missing_details"}

@@ -6,7 +6,7 @@ import json
 import logging
 
 from main import app as agent_app
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 app = FastAPI(title="AstroAgent API")
 
@@ -21,10 +21,13 @@ app.add_middleware(
 from typing import Optional, Dict, Any
 from tools.svg_chart import generate_birth_chart_image
 
+from typing import List
+
 class ChatRequest(BaseModel):
     message: str
     mode: str = "western"  # "western" or "vedic"
     user_context: Optional[Dict[str, Any]] = None
+    history: Optional[List[Dict[str, str]]] = None
 
 class ChartImageRequest(BaseModel):
     planets: Dict[str, Any]
@@ -34,14 +37,24 @@ class ChartImageRequest(BaseModel):
     name: str
     birth_info: str
 
-async def generate_chat_stream(user_message: str, mode: str, user_context: Optional[Dict[str, Any]] = None):
+async def generate_chat_stream(user_message: str, mode: str, user_context: Optional[Dict[str, Any]] = None, history: Optional[List[Dict[str, str]]] = None):
     # Inject user context directly into the first message or let the agent state handle it
     # For LangGraph, passing it via a system message at the start is effective
     messages = []
     if user_context:
-        ctx_str = f"System Context: The user's name is {user_context.get('name', 'Seeker')}. Birth details: {user_context.get('date', '')} {user_context.get('time', '')} in {user_context.get('place', '')}."
+        gender_str = f" Gender: {user_context.get('gender')}." if user_context.get('gender') else ""
+        ctx_str = f"System Context: The user's name is {user_context.get('name', 'Seeker')}.{gender_str} Birth details: {user_context.get('date', '')} {user_context.get('time', '')} in {user_context.get('place', '')}."
+        if user_context.get('computed_chart'):
+            ctx_str += f"\n\n[CACHED SESSION STATE] Pre-computed Natal Chart:\n{json.dumps(user_context.get('computed_chart'))}\n(Note: Do not call compute_birth_chart, the data is already provided above.)"
         messages.append(SystemMessage(content=ctx_str))
         
+    if history:
+        for h in history:
+            if h.get("role") == "user":
+                messages.append(HumanMessage(content=h.get("content", "")))
+            elif h.get("role") == "agent":
+                messages.append(AIMessage(content=h.get("content", "")))
+
     messages.append(HumanMessage(content=user_message))
     
     inputs = {
@@ -78,7 +91,7 @@ async def generate_chat_stream(user_message: str, mode: str, user_context: Optio
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(
-        generate_chat_stream(request.message, request.mode, request.user_context), 
+        generate_chat_stream(request.message, request.mode, request.user_context, request.history), 
         media_type="text/event-stream"
     )
 
