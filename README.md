@@ -8,14 +8,14 @@ AstroAgent is a LangGraph-powered conversational AI astrologer built for Aradhan
 
 ### 1. Backend (FastAPI + LangGraph)
 1. Navigate to the backend directory: `cd backend`
-2. Create a virtual environment: `python -m venv venv`
+2. Create a virtual environment: `python3 -m venv venv`
 3. Activate it: `source venv/bin/activate` (Mac/Linux) or `venv\Scripts\activate` (Windows)
-4. Install dependencies: `pip install -r requirements.txt`
+4. Install dependencies: `pip3 install -r requirements.txt` (or just `pip install...` depending on OS)
 5. Create a `.env` file in the `backend` directory and add your Groq API key:
    ```env
    GROQ_API_KEY=your_api_key_here
    ```
-6. Start the server: `python -m api.server` (runs on http://localhost:8080)
+6. Start the server: `python3 -m api.server` (runs on http://localhost:8080)
 
 ### 2. Frontend (React)
 1. Open a new terminal and navigate to the frontend directory: `cd frontend`

@@ -237,7 +237,14 @@ function Sidebar({ onAlign, onNewReading, onLoadSession, onDeleteSession,
 
   const validate = () => {
     const e = {};
-    if (!form.date) e.date = 'Required';
+    if (!form.date) {
+      e.date = 'Required';
+    } else {
+      const year = parseInt(form.date.split('-')[0]);
+      if (year < 1900 || year > 2100) {
+        e.date = 'Invalid Year (must be 1900-2100)';
+      }
+    }
     if (!form.hour || !form.min) e.time = 'Required';
     if (!form.place.trim()) e.place = 'Required';
     if (!form.gender) e.gender = 'Required';
@@ -419,7 +426,7 @@ function Sidebar({ onAlign, onNewReading, onLoadSession, onDeleteSession,
           )}
         </div>
 
-        <div className="sidebar-footer">ज्योतिर्विद — Jyotirvid</div>
+        <div className="sidebar-footer">AstroAgent</div>
       </aside>
     </>
   );

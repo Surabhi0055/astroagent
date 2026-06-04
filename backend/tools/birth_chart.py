@@ -66,6 +66,10 @@ def compute_birth_chart(
     mode: str = "western"
 ) -> dict:
     try:
+        year = int(date.split('-')[0])
+        if year < 1900 or year > 2100:
+            return {"success": False, "error": "Invalid birth year. Must be between 1900 and 2100."}
+
         # Internally geocode the place to avoid LLM hallucinating timezones
         from tools.geocode import geocode_place
         geo = geocode_place(place_name)
