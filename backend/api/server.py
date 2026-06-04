@@ -80,8 +80,7 @@ async def generate_chat_stream(user_message: str, mode: str, user_context: Optio
                 tool_name = event["name"]
                 tool_inputs = event["data"].get("input", {})
                 started_at_str = datetime.now().strftime("%H:%M:%S")
-                if run_id:
-                    tool_timings[run_id] = time.time()
+                tool_timings[tool_name] = time.time()
                 
                 yield f"data: {json.dumps({'type': 'tool_start', 'tool': tool_name, 'inputs': tool_inputs, 'started_at': started_at_str})}\n\n"
                 
@@ -92,8 +91,8 @@ async def generate_chat_stream(user_message: str, mode: str, user_context: Optio
                     tool_output = tool_output.content
                     
                 duration_ms = 0
-                if run_id and run_id in tool_timings:
-                    duration_ms = int((time.time() - tool_timings[run_id]) * 1000)
+                if tool_name in tool_timings:
+                    duration_ms = int((time.time() - tool_timings[tool_name]) * 1000)
                     
                 completed_at_str = datetime.now().strftime("%H:%M:%S")
                     

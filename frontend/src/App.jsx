@@ -92,7 +92,7 @@ function Typing() {
   return (
     <div className="typing-indicator">
       <div className="dots"><div className="dot"/><div className="dot"/><div className="dot"/></div>
-      <span>The stars are aligning...</span>
+      <span>Processing request...</span>
     </div>
   );
 }
@@ -760,7 +760,7 @@ export default function App() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit(e); }}
-                  placeholder="Start your cosmic journey..."
+                  placeholder="Type your message..."
                   disabled={loading && !activeTool}
                   maxLength={500}
                   aria-label="Message input"

@@ -99,7 +99,7 @@ def compute_birth_chart(
             }
 
         # Calculate houses (Placidus system by default, handling Sidereal mode if applied)
-        cusps, ascmc = swe.houses(julian_day, latitude, longitude, b'P')
+        cusps, ascmc = swe.houses_ex(julian_day, latitude, longitude, b'P', flags)
         
         houses_data = {}
         for i in range(1, 13):
