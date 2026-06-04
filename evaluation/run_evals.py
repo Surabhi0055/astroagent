@@ -10,7 +10,7 @@ from main import app as agent_app
 from langchain_core.messages import HumanMessage
 
 def run_evaluation():
-    print("🔮 Starting AstroAgent Evaluation Harness...")
+    print("Starting AstroAgent Evaluation Harness...")
     golden_set_path = os.path.join(os.path.dirname(__file__), "golden_set.jsonl")
     
     cases = []
@@ -71,8 +71,8 @@ def run_evaluation():
             
             results.append({
                 "ID": f"{idx + 1}",
-                "Intent Pass": "✅" if intent_pass else "❌",
-                "Tools Pass": "✅" if tools_pass else "❌",
+                "Intent Pass": "Yes" if intent_pass else "No",
+                "Tools Pass": "Yes" if tools_pass else "No",
                 "Tools Count": len(tools_called),
                 "Tokens": input_tokens + output_tokens,
                 "Latency (s)": f"{latency:.2f}",
@@ -83,8 +83,8 @@ def run_evaluation():
             total_failures += 1
             results.append({
                 "ID": f"{idx + 1}",
-                "Intent Pass": "❌",
-                "Tools Pass": "❌",
+                "Intent Pass": "No",
+                "Tools Pass": "No",
                 "Tools Count": 0,
                 "Tokens": 0,
                 "Latency (s)": f"{(time.time() - start_time):.2f}",
@@ -112,7 +112,7 @@ def run_evaluation():
         f.write(md_content)
         
     print("\n" + "="*50)
-    print("📊 EVALUATION COMPLETE")
+    print("EVALUATION COMPLETE")
     print(f"Results saved to {out_path}")
     print(f"Failure Rate: {failure_rate:.1f}%")
     print(f"p50 Latency: {p50_latency:.2f}s")

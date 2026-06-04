@@ -8,3 +8,6 @@ pyswisseph
 geopy
 python-dotenv
 timezonefinder
+svgwrite
+pydantic
+tabulate

@@ -3,9 +3,13 @@ uvicorn
 langgraph
 langchain
 langchain-community
-langchain-ollama
+langchain-groq
+pyswisseph
+svgwrite
 flatlib
 geopy
+timezonefinder
 python-dotenv
 httpx
-EOF
+pydantic
+tabulate

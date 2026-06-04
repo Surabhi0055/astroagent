@@ -4,7 +4,7 @@ AstroAgent is a LangGraph-powered conversational AI astrologer built for Aradhan
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Backend (FastAPI + LangGraph)
 1. Navigate to the backend directory: `cd backend`
@@ -24,7 +24,7 @@ AstroAgent is a LangGraph-powered conversational AI astrologer built for Aradhan
 
 ---
 
-## 🏛 Architecture
+## Architecture
 
 AstroAgent is built using **FastAPI** (Backend API), **LangGraph** (Agentic Loop), **React** (Frontend UI), and **pyswisseph** (Swiss Ephemeris for astronomical calculations).
 
@@ -45,7 +45,7 @@ graph TD
     Server -.->|SSE Stream| User
 ```
 
-## 🛠 Tool Flow
+## Tool Flow
 
 The AI grounds its responses using four specialized tools. It is strictly prohibited from hallucinating planetary positions.
 
@@ -67,7 +67,7 @@ sequenceDiagram
     Graph-->>LLM: Text Tool Output
 ```
 
-## 🔄 Data Flow (Caching & Optimization)
+## Data Flow (Caching & Optimization)
 
 To prevent Groq rate limits (6,000 TPM) and excessive recomputation, the frontend caches the generated chart and passes it directly in the `user_context`.
 
@@ -81,7 +81,7 @@ graph LR
 
 ---
 
-## 🧪 Evaluation
+## Evaluation
 
 This project treats evaluation as a first-class deliverable. We use an automated scorecard (`evaluation/run_evals.py`) against an expanded **30-case Golden Set** (`evaluation/golden_set.jsonl`).
 
@@ -99,7 +99,7 @@ python evaluation/run_evals.py
 
 ---
 
-## 🛡 Safety & Guardrails
+## Safety & Guardrails
 
 The `SYSTEM_PROMPT` enforces strict domain boundaries. The agent will gracefully refuse to provide:
 - **Medical Advice** (Redirects to physician)
@@ -111,7 +111,7 @@ Every response is required to start with an explicit `Analysis Based On:` block 
 
 ---
 
-## 🔮 Known Limitations & Future Work
+## Known Limitations & Future Work
 
 **Current Limitations:**
 - Short-term session history is tracked in React state, but long-term conversational memory requires a Postgres/Redis database.
@@ -123,7 +123,7 @@ Every response is required to start with an explicit `Analysis Based On:` block 
 
 ---
 
-## ✅ Submission Checklist
+## Submission Checklist
 - [x] LangGraph Architecture (Router -> Reason -> Tool)
 - [x] Tool Correctness (PySwissEph Integration)
 - [x] Evaluation Rigor (30+ Golden Set, Scorecard)

@@ -26,7 +26,7 @@ const PLANET_MEANINGS = {
 
 const WELCOME = {
   id: 'welcome', role: 'agent', type: 'oracle',
-  content: "Welcome, seeker. The stars have noted your arrival.\n\nShare your birth details in the sidebar and I shall cast your natal chart from the real positions of the heavens. Ask me anything — your chart, today's transits, or what the cosmos holds for your path ahead.",
+  content: "Welcome, seeker.\n\nShare your birth details in the sidebar and I shall cast your natal chart from the real positions of the heavens. Ask me anything — your chart, today's transits, or what the cosmos holds for your path ahead.",
   timestamp: new Date().toISOString(),
 };
 
@@ -38,7 +38,19 @@ const fmtShort= (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric',
 
 /* Session storage helpers */
 function loadSessions() {
-  try { return JSON.parse(localStorage.getItem(SESSIONS_KEY)) || []; } catch { return []; }
+  try {
+    const sessions = JSON.parse(localStorage.getItem(SESSIONS_KEY)) || [];
+    sessions.forEach(s => {
+      if (s.messages) {
+        s.messages.forEach(m => {
+          if (m.id === 'welcome' && typeof m.content === 'string' && m.content.includes("The stars have noted your arrival.")) {
+            m.content = m.content.replace(" The stars have noted your arrival.", "");
+          }
+        });
+      }
+    });
+    return sessions;
+  } catch { return []; }
 }
 function saveSessions(s) {
   try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(s)); } catch {}
@@ -773,7 +785,10 @@ export default function App() {
                   aria-label="Message input"
                 />
                 <button type="submit" className="btn-send" disabled={!input.trim() || loading}>
-                  Send
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
                 </button>
               </form>
               <div className="input-footer">
