@@ -55,7 +55,9 @@ tools = [compute_birth_chart, get_daily_transits, knowledge_lookup]
 
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
-    api_key=os.getenv("GROQ_API_KEY")
+    api_key=os.getenv("GROQ_API_KEY"),
+    max_retries=5,
+    max_tokens=1024
 ).bind_tools(tools)
 
 # ── State ──────────────────────────────────────────────────────────────────
