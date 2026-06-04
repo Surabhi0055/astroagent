@@ -21,6 +21,7 @@ const PLANET_MEANINGS = {
   Mars:    (s) => `Mars in ${s} is your drive, ambition, and the fire that moves you to action.`,
   Jupiter: (s) => `Jupiter in ${s} marks where grace and expansion flow into your life.`,
   Saturn:  (s) => `Saturn in ${s} holds the lessons the cosmos placed in your path.`,
+  Ascendant: (s) => `Ascendant in ${s} represents your outward mask and how you first approach the world.`,
 };
 
 const WELCOME = {
@@ -568,9 +569,11 @@ export default function App() {
                   if (raw?.planets) {
                     if ((mode || currentMode) === 'vedic') setVedic(raw);
                     else setWestern(raw);
-                    setBadges(['Sun', 'Moon', 'Mercury']
-                      .map(p => ({ planet: p, sign: raw.planets[p]?.sign }))
-                      .filter(b => b.sign));
+                    setBadges([
+                      { planet: 'Sun', sign: raw.planets['Sun']?.sign },
+                      { planet: 'Moon', sign: raw.planets['Moon']?.sign },
+                      { planet: 'Ascendant', sign: raw.ascendant?.sign }
+                    ].filter(b => b.sign));
 
                     const user = alignedUser || { name: 'Seeker', date: raw.birth_date, time: raw.birth_time, place: 'Unknown' };
                     fetch(API_URL.replace('/api/chat', '/api/chart/image'), {
