@@ -45,11 +45,17 @@ async def generate_chat_stream(user_message: str, mode: str, user_context: Optio
         gender_str = f" Gender: {user_context.get('gender')}." if user_context.get('gender') else ""
         ctx_str = f"System Context: The user's name is {user_context.get('name', 'Seeker')}.{gender_str} Birth details: {user_context.get('date', '')} {user_context.get('time', '')} in {user_context.get('place', '')}."
         if user_context.get('computed_chart'):
-            ctx_str += f"\n\n[CACHED SESSION STATE] Pre-computed Natal Chart:\n{json.dumps(user_context.get('computed_chart'))}\n(Note: Do not call compute_birth_chart, the data is already provided above.)"
+            slim_chart = {
+                k: v for k, v in user_context['computed_chart'].items()
+                if k not in ['aspects', 'houses']
+            }
+            ctx_str += f"\n\n[CACHED SESSION STATE] Pre-computed Natal Chart:\n{json.dumps(slim_chart)}\n(Note: Do not call compute_birth_chart, the data is already provided above.)"
         messages.append(SystemMessage(content=ctx_str))
         
     if history:
-        for h in history:
+        # Only keep the last 4 messages to prevent exceeding Groq TPM limits
+        recent_history = history[-4:]
+        for h in recent_history:
             if h.get("role") == "user":
                 messages.append(HumanMessage(content=h.get("content", "")))
             elif h.get("role") == "agent":

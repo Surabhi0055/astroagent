@@ -1,4 +1,4 @@
-/* ── Design Tokens ─────────────────────────────────────────── */
+/* Design Tokens  */
 :root {
   --saffron:       #B45309;
   --saffron-light: #D97706;
@@ -31,7 +31,7 @@
   --shadow-float: 0 8px 32px rgba(59, 31, 14, 0.12);
 }
 
-/* ── Reset ─────────────────────────────────────────────────── */
+/*  Reset  */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; }
 body {
@@ -43,14 +43,14 @@ body {
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 input  { font-family: inherit; outline: none; }
 
-/* ── Layout ─────────────────────────────────────────────────── */
+/*  Layout  */
 .layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────── */
+/*  Sidebar  */
 .sidebar {
   width: 50px;
   min-width: 50px;
@@ -420,7 +420,7 @@ input  { font-family: inherit; outline: none; }
   color: var(--warm-brown);
 }
 
-/* ── Main Chat Area ──────────────────────────────────────────── */
+/*  Main Chat Area  */
 .chat-main {
   flex: 1;
   display: flex;
@@ -560,7 +560,7 @@ input  { font-family: inherit; outline: none; }
   white-space: nowrap;
 }
 
-/* ── Messages ─────────────────────────────────────────────────── */
+/*  Messages  */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -660,7 +660,7 @@ input  { font-family: inherit; outline: none; }
   padding-left: 2px;
 }
 
-/* ── Workflow Dashboard ──────────────────────────────────────────────── */
+/*  Workflow Dashboard  */
 .workflow-dashboard {
   margin-bottom: 1rem;
   background: var(--panel);
@@ -912,7 +912,7 @@ input  { font-family: inherit; outline: none; }
   border: none;
 }
 
-/* ── Input Area ─────────────────────────────────────────────── */
+/*  Input Area  */
 .input-area {
   padding: 0.9rem 1.5rem 1rem;
   background: var(--ivory);
@@ -988,7 +988,7 @@ input  { font-family: inherit; outline: none; }
   padding: 0.35rem 0 0;
 }
 
-/* ── Natal Console Tab ──────────────────────────────────────── */
+/*  Natal Console Tab  */
 .natal-panel {
   flex: 1;
   overflow-y: auto;
@@ -1063,7 +1063,7 @@ input  { font-family: inherit; outline: none; }
   line-height: 1.7;
 }
 
-/* ── Animations ─────────────────────────────────────────────── */
+/*  Animations  */
 @keyframes msgIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1098,7 +1098,7 @@ input  { font-family: inherit; outline: none; }
   100% { background-position: 0% 50%; }
 }
 
-/* ── Mobile ─────────────────────────────────────────────────── */
+/*  Mobile  */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;

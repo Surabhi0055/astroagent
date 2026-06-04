@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import './index.css';
 
-/* ── Constants ──────────────────────────────────────────────── */
+/* Constants */
 const API_URL      = 'http://localhost:8080/api/chat';
 const SESSIONS_KEY = 'astroagent_sessions';
 const ACTIVE_KEY   = 'astroagent_active';
@@ -30,13 +30,13 @@ const WELCOME = {
   timestamp: new Date().toISOString(),
 };
 
-/* ── Helpers ─────────────────────────────────────────────────── */
+/* Helpers */
 const uid     = () => Math.random().toString(36).slice(2);
 const fmt     = (d) => new Date(d).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 const fmtShort= (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-/* ── Session storage helpers ─────────────────────────────────── */
+/* Session storage helpers */
 function loadSessions() {
   try { return JSON.parse(localStorage.getItem(SESSIONS_KEY)) || []; } catch { return []; }
 }
@@ -55,7 +55,7 @@ function newSession() {
   };
 }
 
-/* ── Small components ────────────────────────────────────────── */
+/* Small components */
 function CopyBtn({ text }) {
   const [done, setDone] = useState(false);
   return (
@@ -97,7 +97,7 @@ function Typing() {
   );
 }
 
-/* ── Natal Console panel ─────────────────────────────────────── */
+/* Natal Console panel */
 function NatalPanel({ chart, chartImage }) {
   if (!chart) return (
     <div className="natal-panel">
@@ -222,7 +222,7 @@ function NatalPanel({ chart, chartImage }) {
 
 
 
-/* ── Sidebar ─────────────────────────────────────────────────── */
+/* Sidebar */
 function Sidebar({ onAlign, onNewReading, onLoadSession, onDeleteSession,
   westernChart, vedicChart, sessions, activeId, isOpen, onClose }) {
 
@@ -432,7 +432,7 @@ function Sidebar({ onAlign, onNewReading, onLoadSession, onDeleteSession,
   );
 }
 
-/* ── App ─────────────────────────────────────────────────────── */
+/* App */
 export default function App() {
   const initState = () => {
     const sessions = loadSessions();
@@ -693,7 +693,7 @@ export default function App() {
                     <div className="msg-agent-bubble">
                       {msg.tools && msg.tools.length > 0 && (
                         <div className="workflow-dashboard">
-                          <div className="workflow-header">🛠 TOOL ACTIVITY</div>
+                          <div className="workflow-header"> TOOL ACTIVITY</div>
                           <div className="workflow-steps">
                             {msg.tools.map((t, i) => (
                               <div key={i} className={`workflow-step ${t.status}`}>
@@ -773,10 +773,7 @@ export default function App() {
                   aria-label="Message input"
                 />
                 <button type="submit" className="btn-send" disabled={!input.trim() || loading}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                  </svg>
+                  Send
                 </button>
               </form>
               <div className="input-footer">
