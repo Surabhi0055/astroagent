@@ -103,7 +103,7 @@ function NatalPanel({ chart, chartImage }) {
     <div className="natal-panel">
       <div className="natal-empty">
         Your natal chart has not been cast yet.<br />
-        Enter your birth details in the sidebar and submit to align your celestial map.
+        Enter your birth details in the sidebar and submit to generate your chart.
       </div>
     </div>
   );
@@ -145,7 +145,7 @@ function NatalPanel({ chart, chartImage }) {
   return (
     <div className="natal-panel">
       <h2 style={{ marginBottom: '0.5rem' }}>Your Celestial Map</h2>
-      <p className="subtitle" style={{ marginBottom: '2rem' }}>Placidus Houses • Tropical Zodiac</p>
+      <p className="subtitle" style={{ marginBottom: '2rem' }}>Whole Sign Houses</p>
 
       {chartImage && (
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -361,10 +361,10 @@ function Sidebar({ onAlign, onNewReading, onLoadSession, onDeleteSession,
         </div>
 
         <button className="btn-align" onClick={handleAlign} disabled={!allFilled}>
-          Align Celestial Map
+          Generate Birth Chart
         </button>
 
-        {aligned && <div className="chart-success" role="status">Your celestial map is aligned</div>}
+        {aligned && <div className="chart-success" role="status">Your birth chart is ready</div>}
 
         {chart && (
           <div className="planet-summary">

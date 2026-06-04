@@ -98,8 +98,8 @@ def compute_birth_chart(
                 "sign": get_zodiac_sign(lon)
             }
 
-        # Calculate houses (Placidus system by default, handling Sidereal mode if applied)
-        cusps, ascmc = swe.houses_ex(julian_day, latitude, longitude, b'P', flags)
+        # Calculate houses (Whole Sign system to match LLM reasoning and Vedic standards)
+        cusps, ascmc = swe.houses_ex(julian_day, latitude, longitude, b'W', flags)
         
         houses_data = {}
         for i in range(1, 13):
