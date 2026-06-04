@@ -63,7 +63,7 @@ graph LR
 
 ## 🧪 Evaluation
 
-This project treats evaluation as a first-class deliverable. We use an automated scorecard (`evaluation/scorecard.py`) against an expanded **30-case Golden Set** (`golden_set_expanded.jsonl`).
+This project treats evaluation as a first-class deliverable. We use an automated scorecard (`evaluation/run_evals.py`) against an expanded **30-case Golden Set** (`evaluation/golden_set.jsonl`).
 
 ### Categories Tested
 1. Valid Chart / Transit Requests
@@ -73,9 +73,9 @@ This project treats evaluation as a first-class deliverable. We use an automated
 
 To run the scorecard:
 ```bash
-python backend/evaluation/scorecard.py
+python evaluation/run_evals.py
 ```
-*(See `backend/evaluation/evaluation_results.md` for the latest latency and pass-rate metrics).*
+*(See `evaluation/evaluation_results.md` and `EVALUATION.md` for the latest latency, cost, token, and pass-rate metrics).*
 
 ---
 

@@ -2,9 +2,9 @@ import sys
 import os
 import json
 import time
+import statistics
 from tabulate import tabulate
 
-# Add backend to path so we can import the agent
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend')))
 from main import app as agent_app
 from langchain_core.messages import HumanMessage
@@ -20,67 +20,104 @@ def run_evaluation():
                 cases.append(json.loads(line))
                 
     results = []
-    total_latency = 0
-    total_tokens = 0 # Rough estimate since stream doesn't easily expose this
+    latencies = []
+    total_cost = 0.0
+    total_tokens = 0
+    total_failures = 0
     
     for idx, case in enumerate(cases):
         print(f"\nRunning Eval Case {idx + 1}/{len(cases)}...")
         input_text = case["input"]
         expected_intent = case["expected_intent"]
         must_call_tools = case.get("must_call_tools", [])
+        expected_behavior = case.get("expected_behavior")
         
         start_time = time.time()
         
-        # We will invoke synchronously for evaluation
         inputs = {"messages": [HumanMessage(content=input_text)]}
         try:
-            # First, check the intent by running just the router node manually for testing
-            # Or we can just run the full graph and check state
             final_state = agent_app.invoke(inputs)
             latency = time.time() - start_time
-            total_latency += latency
+            latencies.append(latency)
             
-            # Extract actual intent and tools called
             actual_intent = final_state.get("intent", "unknown")
             
-            # Find tools called in the messages
             tools_called = []
+            input_tokens = 0
+            output_tokens = 0
+            
             for msg in final_state["messages"]:
                 if hasattr(msg, "tool_calls") and msg.tool_calls:
                     for tool_call in msg.tool_calls:
                         tools_called.append(tool_call["name"])
+                if hasattr(msg, "response_metadata") and msg.response_metadata:
+                    usage = msg.response_metadata.get("token_usage", {})
+                    if usage:
+                        input_tokens += usage.get("prompt_tokens", 0)
+                        output_tokens += usage.get("completion_tokens", 0)
             
-            # Determine success
+            # Groq Llama-3.1-8b approximate pricing
+            case_cost = (input_tokens / 1_000_000 * 0.05) + (output_tokens / 1_000_000 * 0.08)
+            total_cost += case_cost
+            total_tokens += (input_tokens + output_tokens)
+            
+            # Checks
             intent_pass = actual_intent == expected_intent
             tools_pass = all(t in tools_called for t in must_call_tools)
+            
             success = intent_pass and tools_pass
+            if not success:
+                total_failures += 1
             
             results.append({
-                "Test Case": f"Case {idx + 1}",
+                "ID": f"{idx + 1}",
                 "Intent Pass": "✅" if intent_pass else "❌",
                 "Tools Pass": "✅" if tools_pass else "❌",
-                "Latency (s)": round(latency, 2),
+                "Tools Count": len(tools_called),
+                "Tokens": input_tokens + output_tokens,
+                "Latency (s)": f"{latency:.2f}",
                 "Status": "PASS" if success else "FAIL"
             })
             
         except Exception as e:
+            total_failures += 1
             results.append({
-                "Test Case": f"Case {idx + 1}",
+                "ID": f"{idx + 1}",
                 "Intent Pass": "❌",
                 "Tools Pass": "❌",
-                "Latency (s)": round(time.time() - start_time, 2),
-                "Status": f"FAIL ({str(e)[:20]})"
+                "Tools Count": 0,
+                "Tokens": 0,
+                "Latency (s)": f"{(time.time() - start_time):.2f}",
+                "Status": f"FAIL ({str(e)[:15]})"
             })
             
-    # Print Scorecard
+    # Calculate stats
+    p50_latency = statistics.median(latencies) if latencies else 0
+    p95_latency = statistics.quantiles(latencies, n=20)[18] if len(latencies) >= 20 else max(latencies) if latencies else 0
+    failure_rate = (total_failures / len(cases)) * 100
+    
+    # Save to MD
+    md_content = f"# AstroAgent Evaluation Scorecard\n\n"
+    md_content += f"**Total Runs:** {len(cases)}\n"
+    md_content += f"**Failure Rate:** {failure_rate:.1f}%\n"
+    md_content += f"**Total Cost:** ${total_cost:.5f}\n"
+    md_content += f"**Total Tokens:** {total_tokens}\n"
+    md_content += f"**p50 Latency:** {p50_latency:.2f}s\n"
+    md_content += f"**p95 Latency:** {p95_latency:.2f}s\n\n"
+    
+    md_content += tabulate(results, headers="keys", tablefmt="github")
+    
+    out_path = os.path.join(os.path.dirname(__file__), "evaluation_results.md")
+    with open(out_path, "w") as f:
+        f.write(md_content)
+        
     print("\n" + "="*50)
-    print("📊 EVALUATION SCORECARD")
+    print("📊 EVALUATION COMPLETE")
+    print(f"Results saved to {out_path}")
+    print(f"Failure Rate: {failure_rate:.1f}%")
+    print(f"p50 Latency: {p50_latency:.2f}s")
+    print(f"Total Cost: ${total_cost:.5f}")
     print("="*50)
-    print(tabulate(results, headers="keys", tablefmt="github"))
-    
-    passed = sum(1 for r in results if r["Status"] == "PASS")
-    print(f"\nOverall Pass Rate: {passed}/{len(cases)} ({passed/len(cases)*100:.1f}%)")
-    print(f"Average Latency: {total_latency/len(cases):.2f}s")
-    
+
 if __name__ == "__main__":
     run_evaluation()
