@@ -61,10 +61,15 @@ async def generate_chat_stream(user_message: str, mode: str, user_context: Optio
         "messages": messages,
         "mode": mode
     }
+    import time
+    from datetime import datetime
     
+    tool_timings = {}
+
     try:
         async for event in agent_app.astream_events(inputs, version="v2"):
             kind = event["event"]
+            run_id = event.get("run_id")
             
             if kind == "on_chat_model_stream":
                 content = event["data"]["chunk"].content
@@ -74,14 +79,25 @@ async def generate_chat_stream(user_message: str, mode: str, user_context: Optio
             elif kind == "on_tool_start":
                 tool_name = event["name"]
                 tool_inputs = event["data"].get("input", {})
-                yield f"data: {json.dumps({'type': 'tool_start', 'tool': tool_name, 'inputs': tool_inputs})}\n\n"
+                started_at_str = datetime.now().strftime("%H:%M:%S")
+                if run_id:
+                    tool_timings[run_id] = time.time()
+                
+                yield f"data: {json.dumps({'type': 'tool_start', 'tool': tool_name, 'inputs': tool_inputs, 'started_at': started_at_str})}\n\n"
                 
             elif kind == "on_tool_end":
                 tool_name = event["name"]
                 tool_output = event["data"].get("output", "")
                 if hasattr(tool_output, "content"):
                     tool_output = tool_output.content
-                yield f"data: {json.dumps({'type': 'tool_end', 'tool': tool_name, 'output': str(tool_output)})}\n\n"
+                    
+                duration_ms = 0
+                if run_id and run_id in tool_timings:
+                    duration_ms = int((time.time() - tool_timings[run_id]) * 1000)
+                    
+                completed_at_str = datetime.now().strftime("%H:%M:%S")
+                    
+                yield f"data: {json.dumps({'type': 'tool_end', 'tool': tool_name, 'output': str(tool_output), 'completed_at': completed_at_str, 'duration_ms': duration_ms})}\n\n"
 
         yield "data: [DONE]\n\n"
     except Exception as e:

@@ -553,14 +553,14 @@ export default function App() {
             } else if (data.type === 'tool_start') {
               setActiveTool(data.tool); setLoading(false);
               setMessages(prev => prev.map(m =>
-                m.id === agentId ? { ...m, tools: [...(m.tools || []), { name: data.tool, status: 'running' }] } : m
+                m.id === agentId ? { ...m, tools: [...(m.tools || []), { name: data.tool, status: 'running', startedAt: data.started_at }] } : m
               ));
             } else if (data.type === 'tool_end') {
               setActiveTool(null);
               setMessages(prev => prev.map(m =>
                 m.id === agentId ? {
                   ...m,
-                  tools: (m.tools || []).map(t => t.name === data.tool ? { ...t, status: 'complete' } : t)
+                  tools: (m.tools || []).map(t => t.name === data.tool ? { ...t, status: 'complete', completedAt: data.completed_at, durationMs: data.duration_ms } : t)
                 } : m
               ));
               if (data.tool === 'compute_birth_chart') {
@@ -685,14 +685,46 @@ export default function App() {
                   <div key={msg.id} className="msg-agent">
                     <div className="msg-agent-bubble">
                       {msg.tools && msg.tools.length > 0 && (
-                        <div className="msg-tools-activity" style={{ marginBottom: '12px', padding: '10px', background: 'rgba(255,179,71,0.1)', borderLeft: '3px solid #ffb347', borderRadius: '4px', fontSize: '0.9em' }}>
-                          <div style={{ fontWeight: '600', marginBottom: '6px', color: '#ffb347', letterSpacing: '0.5px' }}>🛠 TOOL ACTIVITY</div>
-                          {msg.tools.map((t, i) => (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: t.status === 'running' ? 0.7 : 1, marginTop: '4px', color: '#fff' }}>
-                              <span style={{ fontSize: '1.1em' }}>{t.status === 'running' ? '⏳' : '✓'}</span>
-                              <span>{TOOL_LABELS[t.name] || t.name}{t.status === 'running' ? '...' : ''}</span>
+                        <div className="workflow-dashboard">
+                          <div className="workflow-header">🛠 TOOL ACTIVITY</div>
+                          <div className="workflow-steps">
+                            {msg.tools.map((t, i) => (
+                              <div key={i} className={`workflow-step ${t.status}`}>
+                                <div className="workflow-step-icon">
+                                  {t.status === 'running' ? '⏳' : t.status === 'complete' ? '✓' : '❌'}
+                                </div>
+                                <div className="workflow-step-content">
+                                  <div className="workflow-step-title">
+                                    <span className="step-num">Step {i + 1}</span>
+                                    <span className="step-label">{TOOL_LABELS[t.name] || t.name}</span>
+                                  </div>
+                                  <div className="workflow-technical-label">{t.name}()</div>
+                                  {t.status === 'complete' && t.durationMs !== undefined && (
+                                    <div className="workflow-timing">Completed in {(t.durationMs / 1000).toFixed(2)}s</div>
+                                  )}
+                                  {t.status === 'running' && (
+                                    <div className="workflow-timing">Running...</div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="workflow-footer">
+                            <div className="footer-stat">
+                              <span className="stat-value">{msg.tools.length}</span>
+                              <span className="stat-label">Tool{msg.tools.length > 1 ? 's' : ''} Executed</span>
                             </div>
-                          ))}
+                            <div className="footer-stat">
+                              <span className="stat-label">Total Time:</span>
+                              <span className="stat-value">{(msg.tools.reduce((acc, t) => acc + (t.durationMs || 0), 0) / 1000).toFixed(2)}s</span>
+                            </div>
+                            <div className="footer-stat">
+                              <span className="stat-label">Status:</span>
+                              <span className={`stat-value ${msg.tools.some(t => t.status === 'failed') ? 'error' : msg.tools.some(t => t.status === 'running') ? 'running' : 'success'}`}>
+                                {msg.tools.some(t => t.status === 'failed') ? 'Failed' : msg.tools.some(t => t.status === 'running') ? 'In Progress' : 'Success'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       )}
                       <span style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</span>

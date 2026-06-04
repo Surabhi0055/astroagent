@@ -660,6 +660,125 @@ input  { font-family: inherit; outline: none; }
   padding-left: 2px;
 }
 
+/* ── Workflow Dashboard ──────────────────────────────────────────────── */
+.workflow-dashboard {
+  margin-bottom: 1rem;
+  background: var(--panel);
+  border: 1px solid rgba(180, 83, 9, 0.15);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.workflow-header {
+  background: rgba(180, 83, 9, 0.05);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--saffron);
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(180, 83, 9, 0.1);
+  text-transform: uppercase;
+}
+
+.workflow-steps {
+  display: flex;
+  flex-direction: column;
+}
+
+.workflow-step {
+  display: flex;
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  gap: 0.75rem;
+  transition: background 0.2s;
+}
+.workflow-step:last-child {
+  border-bottom: none;
+}
+.workflow-step.running {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.workflow-step-icon {
+  font-size: 1.1rem;
+  margin-top: 0.1rem;
+}
+
+.workflow-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.workflow-step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--deep-brown);
+}
+
+.step-num {
+  background: var(--saffron);
+  color: white;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.workflow-technical-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--warm-brown);
+  opacity: 0.8;
+  background: rgba(0,0,0,0.04);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.workflow-timing {
+  font-size: 0.7rem;
+  color: var(--muted-brown);
+  font-weight: 500;
+  margin-top: 0.1rem;
+}
+
+.workflow-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: rgba(180, 83, 9, 0.03);
+  border-top: 1px solid rgba(180, 83, 9, 0.1);
+  font-size: 0.75rem;
+}
+
+.footer-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.footer-stat .stat-label {
+  color: var(--muted-brown);
+  font-weight: 500;
+}
+
+.footer-stat .stat-value {
+  font-weight: 700;
+  color: var(--deep-brown);
+}
+
+.footer-stat .stat-value.success { color: var(--success); }
+.footer-stat .stat-value.error { color: var(--error); }
+.footer-stat .stat-value.running { color: var(--saffron-light); }
+
 /* Streaming cursor */
 .cursor {
   display: inline-block;
