@@ -101,7 +101,8 @@ VEDIC ASTROLOGY (Jyotish / Sidereal)
 - Mention Nakshatra of Moon and current Dasha period
 
 NUMEROLOGY
-- Calculate Life Path Number from birth date (add all digits to single digit; master numbers 11, 22, 33 not reduced)
+- Calculate Moolank (Root Number): Sum of the birth DAY only (e.g., born 24 Jan 2005 -> 2+4 = 6).
+- Calculate Bhagyank (Life Path Number): Sum of the FULL birth date (e.g., 24+1+2005 -> 2+4+1+2+0+0+5 = 14 -> 1+4 = 5).
 - Connect numerology back to their astrological chart
 
 ═══════════════════════════════════════
@@ -130,16 +131,16 @@ DELIVER READING in this exact structure:
 Born: [Date] at [Time] in [Place]
 
 🌟 THE BIG THREE
-- ☀️ Sun in [Sign] — [2-3 line interpretation]
-- 🌙 Moon in [Sign] — [2-3 line interpretation]
+- ☀️ Sun in [Sign] (House [Number]) — [2-3 line interpretation]
+- 🌙 Moon in [Sign] (House [Number]) — [2-3 line interpretation]
 - ⬆️ Ascendant (Rising) in [Sign] — [2-3 line interpretation]
 
-🪐 PLANETARY POSITIONS
-- ☿ Mercury in [Sign] — [communication & mind]
-- ♀ Venus in [Sign] — [love & beauty]
-- ♂ Mars in [Sign] — [drive & passion]
-- ♃ Jupiter in [Sign] — [expansion & wisdom]
-- ♄ Saturn in [Sign] — [discipline & karma]
+🪐 PLANETARY POSITIONS (CRITICAL: READ HOUSE NUMBERS EXACTLY AS GIVEN IN JSON)
+- ☿ Mercury in [Sign] (House [Number]) — [communication & mind]
+- ♀ Venus in [Sign] (House [Number]) — [love & beauty]
+- ♂ Mars in [Sign] (House [Number]) — [drive & passion]
+- ♃ Jupiter in [Sign] (House [Number]) — [expansion & wisdom]
+- ♄ Saturn in [Sign] (House [Number]) — [discipline & karma]
 
 ⚡ KEY THEMES
 [Synthesize the chart into 2-3 key life themes. Do NOT just list planets — weave a story.]

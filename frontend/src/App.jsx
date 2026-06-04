@@ -166,7 +166,7 @@ function NatalPanel({ chart, chartImage }) {
             <tr key={p}>
               <td style={{ fontWeight: 600, color: 'var(--warm-brown)' }}>{p}</td>
               <td className="sign-cell">{data.sign}</td>
-              <td className="deg-cell">{Math.floor(data.degree % 30)}° {Math.round((data.degree % 1) * 60)}'</td>
+              <td className="deg-cell">{Math.floor(data.degrees % 30)}° {Math.round((data.degrees % 1) * 60)}'</td>
               <td style={{ fontSize: '0.85rem' }}>{data.house}{data.house === 1 ? 'st' : data.house === 2 ? 'nd' : data.house === 3 ? 'rd' : 'th'}</td>
             </tr>
           ))}
